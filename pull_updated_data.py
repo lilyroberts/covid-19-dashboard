@@ -19,7 +19,7 @@ def pull_table(conn, name):
                     'cdc_cases_by_report_date': [1, 2],
                     'cdc_cases_by_onset_date': [1, 2]}
 
-    column_map = {'cdc_cases_by_state': {0: 'state', 1: 'n_cases', 2: 'community_spread', 3: 'range', 4: 'url'},
+    column_map = {'cdc_cases_by_state': {0: 'state', 1: 'range', 2: 'n_cases', 3: 'community_spread', 4: 'url'},
                   'cdc_cases_by_report_date': {1: 'date', 2: 'n_cases'},
                   'cdc_cases_by_onset_date': {1: 'date', 2: 'n_cases'}}
 
