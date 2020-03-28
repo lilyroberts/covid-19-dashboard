@@ -17,11 +17,11 @@ CASES_BY_REPORT_DATE_URL = 'https://www.cdc.gov/coronavirus/2019-ncov/cases-upda
 CASES_BY_ONSET_DATE_URL = 'https://www.cdc.gov/coronavirus/2019-ncov/cases-updates/us-cases-epi-chart.json'
 CURRENT_DATE = dt.datetime.strftime(dt.datetime.now(), '%Y%m%d')
 
-# CREDENTIALS IF NEEDED
-credentials_json_path = "secrets/credentials.json"
-credentials = json.load(open(credentials_json_path))
-MONGODB_USERNAME = credentials["mongodb_username"]
-MONGODB_PASSWORD = credentials["mongodb_password"]
+# # CREDENTIALS IF NEEDED
+# credentials_json_path = "secrets/credentials.json"
+# credentials = json.load(open(credentials_json_path))
+# MONGODB_USERNAME = credentials["mongodb_username"]
+# MONGODB_PASSWORD = credentials["mongodb_password"]
 
 
 def update_db(conn):
