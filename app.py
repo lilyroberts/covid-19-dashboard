@@ -32,6 +32,7 @@ cases_by_onset_date_df = pull_table(conn, 'cdc_cases_by_onset_date').transpose()
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+server = app.server
 
 colors = {
     'background': '#011f4b',
@@ -229,4 +230,4 @@ app.layout = html.Div(children=[
                backgroundColor=colors['background']))
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)
