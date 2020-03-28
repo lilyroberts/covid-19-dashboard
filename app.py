@@ -146,7 +146,7 @@ app.layout = html.Div(children=[
                         'overflow': 'hidden',
                         'color': colors['text']}),
 
-    html.H4(children='Cumulative Count of Cases in United States',
+    html.H4(children='Total Confirmed Cases of SARS-CoV-2 in United States',
             style={
                 'textAlign': 'center',
                 'color': colors['text'],
