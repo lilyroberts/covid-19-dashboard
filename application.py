@@ -230,4 +230,4 @@ app.layout = html.Div(children=[
                backgroundColor=colors['background']))
 
 if __name__ == '__main__':
-    application.run_server(debug=False,port=8080)
+    application.run_server(debug=False, port=8080)

@@ -48,6 +48,7 @@ def update_db(conn):
                                                           'Cases Reported': 'n_cases',
                                                           'Range': 'range',
                                                           'URL': 'url'})
+    cases_by_state_df = cases_by_state_df[cases_by_state_df['state'] != 'Northern Marianas']
     cases_by_state_df = cases_by_state_df.set_index(['state'])
     cases_by_state_df.loc[(cases_by_state_df['n_cases'] == 'None'), 'n_cases'] = np.nan
     cases_by_state_df['n_cases'] = cases_by_state_df['n_cases'].astype(float)
