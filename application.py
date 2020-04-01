@@ -155,9 +155,7 @@ app.layout = html.Div(children=[
             ),
 
     dcc.Graph(id='cases_by_county_chloropleth',
-              figure=cases_by_county_chloropleth,
-              layout=dict(title='Total Confirmed Cases of SARS-CoV-2 by U.S. County'),
-              config=dict(autosizable=True, responsive=True)),
+              figure=cases_by_county_chloropleth),
 
     html.Caption('Data from New York Times - Updated at ' + str(datetime.datetime.strftime(datetime.datetime.now() - datetime.timedelta(hours=4.0),
                                                                                     '%Y-%m-%d %I:%M:%S %p' + ' ET')),
