@@ -99,7 +99,9 @@ cases_by_county_chloropleth = \
                         layout=dict(title='Total Confirmed Cases of SARS-CoV-2 by U.S. County')))
 
 cases_by_county_chloropleth.update_layout(mapbox_style="carto-positron",
-                                          mapbox_zoom=3, mapbox_center={"lat": 37.0902, "lon": -95.7129})
+                                          mapbox_zoom=3, mapbox_center={"lat": 37.0902, "lon": -95.7129},
+                                          title='Total Confirmed Cases of SARS-CoV-2 by U.S. County',
+                                          colorbar_title='N*1000 Confirmed Cases')
 
 cases_by_county_chloropleth.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
 
