@@ -88,21 +88,26 @@ current_counties_df = counties_df[counties_df.apply(lambda row: True if (row['da
                               axis=1)]
 
 cases_by_county_chloropleth = \
-                    go.Figure(data=go.Choroplethmapbox(
-                        geojson=counties,
-                        z=current_counties_df.cases,
-                        locations=current_counties_df.fips,
-                        colorscale='Reds',
-                        colorbar_title='N*1000 Confirmed Cases',
-                        marker_opacity=0.5, marker_line_width=0,
-                        layout=dict(title='Total Confirmed Cases of SARS-CoV-2 by U.S. County')))
+    go.Figure(data=go.Choroplethmapbox(
+        geojson=counties,
+        z=current_counties_df.cases,
+        locations=current_counties_df.fips,
+        colorbar_title='N*1000 Cases',
+        colorbar_title_side='right',
+        colorscale='Reds',
+        zmin=0, zmax=12,
+        marker_opacity=0.5, marker_line_width=0))
 
 cases_by_county_chloropleth.update_layout(mapbox_style="carto-positron",
-                                          mapbox_zoom=3, mapbox_center={"lat": 37.0902, "lon": -95.7129},
-                                          title_text='Total Confirmed Cases of SARS-CoV-2 by U.S. County',
-                                          colorbar_title='N*1000 Confirmed Cases')
+                                          mapbox_zoom=3, mapbox_center={"lat": 37.0902, "lon": -95.7129})
 
-cases_by_county_chloropleth.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+cases_by_county_chloropleth.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0},
+                                          autosize=True,
+                                          title_text="Total Confirmed Cases of SARS-CoV-2 by U.S. County",
+                                          titlefont_color='#011f4b',
+                                          title_x=0.5,
+                                          title_y=0.95)
+cases_by_county_chloropleth.update_yaxes(automargin=True)
 
 app.layout = html.Div(children=[
     html.H1(children='SARS-CoV-2',
