@@ -93,8 +93,10 @@ cases_by_county_chloropleth = \
                         z=current_counties_df.cases,
                         locations=current_counties_df.fips,
                         colorscale='Reds',
+                        colorbar_title='N*1000 Confirmed Cases',
                         zmin=0, zmax=12,
-                        marker_opacity=0.5, marker_line_width=0))
+                        marker_opacity=0.5, marker_line_width=0,
+                        layout=dict(title='Total Confirmed Cases of SARS-CoV-2 by U.S. County')))
 
 cases_by_county_chloropleth.update_layout(mapbox_style="carto-positron",
                                           mapbox_zoom=3, mapbox_center={"lat": 37.0902, "lon": -95.7129})
