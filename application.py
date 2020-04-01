@@ -65,7 +65,7 @@ cases_by_state_chloropleth = go.Figure(data=go.Choropleth(
                                             z=cases_by_state_df['n_cases'],
                                             locationmode='USA-states',
                                             colorscale='Reds',
-                                            colorbar_title='N Confirmed Cases',
+                                            colorbar_title='N Confirmed Cases'
                                             )
                                       )
 
@@ -147,7 +147,9 @@ app.layout = html.Div(children=[
             ),
 
     dcc.Graph(id='cases_by_county_chloropleth',
-              figure=cases_by_county_chloropleth),
+              figure=cases_by_county_chloropleth,
+              layout=dict(title='Total Confirmed Cases of SARS-CoV-2 by U.S. County'),
+              config=dict(autosizable=True, responsive=True)),
 
     html.Caption('Data from New York Times - Updated at ' + str(datetime.datetime.strftime(datetime.datetime.now() - datetime.timedelta(hours=4.0),
                                                                                     '%Y-%m-%d %I:%M:%S %p' + ' ET')),
