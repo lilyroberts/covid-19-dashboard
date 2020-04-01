@@ -94,7 +94,6 @@ cases_by_county_chloropleth = \
                         locations=current_counties_df.fips,
                         colorscale='Reds',
                         colorbar_title='N*1000 Confirmed Cases',
-                        zmin=0, zmax=12,
                         marker_opacity=0.5, marker_line_width=0,
                         layout=dict(title='Total Confirmed Cases of SARS-CoV-2 by U.S. County')))
 
