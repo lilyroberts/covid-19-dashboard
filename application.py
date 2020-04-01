@@ -9,7 +9,8 @@ import datetime
 import pandas as pd
 from update_db import update_db
 from pull_updated_data import pull_table
-from itertools import islice
+from urllib.request import urlopen
+import json
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -74,6 +75,32 @@ cases_by_state_chloropleth.update_layout(geo_scope='usa',
                                                 'x':0.5,
                                                 'yanchor': 'top'})
 
+counties_df = pd.read_csv('https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv',
+                          dtype={'fips':'str'})
+counties_df.loc[:,'fips'] = counties_df.dropna(axis=0)
+
+with urlopen('https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json') as response:
+    counties = json.load(response)
+
+most_recent_date = pd.DataFrame(counties_df.groupby(['fips']).max()['date']).to_dict()['date']
+
+current_counties_df = counties_df[counties_df.apply(lambda row: True if (row['date'] == most_recent_date.get(row['fips'])) else False,
+                              axis=1)]
+
+cases_by_county_chloropleth = \
+                    go.Figure(data=go.Choroplethmapbox(
+                        geojson=counties,
+                        z=current_counties_df.cases,
+                        locations=current_counties_df.fips,
+                        colorscale='Reds',
+                        zmin=0, zmax=12,
+                        marker_opacity=0.5, marker_line_width=0))
+
+cases_by_county_chloropleth.update_layout(mapbox_style="carto-positron",
+                                          mapbox_zoom=3, mapbox_center={"lat": 37.0902, "lon": -95.7129})
+
+cases_by_county_chloropleth.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+
 app.layout = html.Div(children=[
     html.H1(children='SARS-CoV-2',
             style={
@@ -111,6 +138,26 @@ app.layout = html.Div(children=[
     #     figure=cases_by_report_date_table
     # ),
 
+    html.H4(children='Reported Cases by US County',
+            style={
+                'textAlign': 'center',
+                'color': colors['text'],
+                'font': 'Helvetica'
+            }
+            ),
+
+    dcc.Graph(id='cases_by_county_chloropleth',
+              figure=cases_by_county_chloropleth),
+
+    html.Caption('Data from New York Times - Updated at ' + str(datetime.datetime.strftime(datetime.datetime.now() - datetime.timedelta(hours=4.0),
+                                                                                    '%Y-%m-%d %I:%M:%S %p' + ' ET')),
+                 style={'font': 'Helvetica',
+                        'font-style':'italic',
+                        'font-weight':'light',
+                        'white-space': 'nowrap',
+                        'overflow': 'hidden',
+                        'color': colors['text']}),
+
     html.H4(children='Reported Cases by US State/Territory',
             style={
                 'textAlign': 'center',
@@ -138,7 +185,7 @@ app.layout = html.Div(children=[
               figure=cases_by_state_chloropleth,
               style={'textAlign': 'center'}),
 
-    html.Caption('Data from CDC.gov - Updated at ' + str(datetime.datetime.strftime(datetime.datetime.now(),
+    html.Caption('Data from CDC.gov - Updated at ' + str(datetime.datetime.strftime(datetime.datetime.now() - datetime.timedelta(hours=4.0),
                                                                                     '%Y-%m-%d %I:%M:%S %p' + ' ET')),
                  style={'font': 'Helvetica',
                         'font-style':'italic',
@@ -178,7 +225,7 @@ app.layout = html.Div(children=[
                                        'textAlign': 'center'}
                          ),
 
-    html.Caption('Data from CDC.gov - Updated at ' + str(datetime.datetime.strftime(datetime.datetime.now(),
+    html.Caption('Data from CDC.gov - Updated at ' + str(datetime.datetime.strftime(datetime.datetime.now() - datetime.timedelta(hours=4.0),
                                                                                     '%Y-%m-%d %I:%M:%S %p' + ' ET')),
                  style={'font': 'Helvetica',
                         'font-style': 'italic',
@@ -216,7 +263,7 @@ app.layout = html.Div(children=[
                                        'font':'Helvetica',
                                        'textAlign': 'center'}
                          ),
-    html.Caption('Data from CDC.gov - Updated at ' + str(datetime.datetime.strftime(datetime.datetime.now(),
+    html.Caption('Data from CDC.gov - Updated at ' + str(datetime.datetime.strftime(datetime.datetime.now() - datetime.timedelta(hours=4.0),
                                                                                     '%Y-%m-%d %I:%M:%S %p' + ' ET')),
                  style={'font': 'Helvetica',
                         'font-style': 'italic',
