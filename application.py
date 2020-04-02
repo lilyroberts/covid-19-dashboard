@@ -223,19 +223,6 @@ app.layout = html.Div(children=[
     #     figure=cases_by_report_date_table
     # ),
 
-    html.H4(children='Cases by US County per 1000 residents',
-            style={
-                'textAlign': 'center',
-                'color': colors['text'],
-                'font': 'Helvetica'
-            }
-            ),
-
-    dcc.Graph(id='cases_by_county_chloropleth_rate',
-              figure=cases_by_county_chloropleth_rate),
-
-    html.Br(),
-
     html.H5(children='Cases by US County per 1000 residents - Normalized',
             style={
                 'textAlign': 'center',
@@ -246,6 +233,19 @@ app.layout = html.Div(children=[
 
     dcc.Graph(id='cases_by_county_chloropleth_rate_norm',
               figure=cases_by_county_chloropleth_rate_norm),
+
+    html.Br(),
+
+    html.H5(children='Cases by US County per 1000 residents',
+            style={
+                'textAlign': 'center',
+                'color': colors['text'],
+                'font': 'Helvetica'
+            }
+            ),
+
+    dcc.Graph(id='cases_by_county_chloropleth_rate',
+              figure=cases_by_county_chloropleth_rate),
 
     html.Br(),
 
@@ -274,8 +274,9 @@ app.layout = html.Div(children=[
                         'color': colors['text']}),
 
     html.Br(),
+    html.Br(),
 
-    html.H4(children='Reported Cases by US State/Territory',
+    html.H5(children='Reported Cases by US State/Territory',
             style={
                 'textAlign': 'center',
                 'color': colors['text'],
@@ -316,7 +317,7 @@ app.layout = html.Div(children=[
                         'overflow': 'hidden',
                         'color': colors['text']}),
 
-    html.H4(children='Total Confirmed Cases of SARS-CoV-2 in United States',
+    html.H5(children='Total Confirmed Cases of SARS-CoV-2 in United States',
             style={
                 'textAlign': 'center',
                 'color': colors['text'],
@@ -358,7 +359,7 @@ app.layout = html.Div(children=[
                         'overflow': 'hidden',
                         'color': colors['text']}),
 
-    html.H4(children='Count of Cases in United States by Onset Date',
+    html.H5(children='Count of Cases in United States by Onset Date',
             style={
                 'textAlign': 'center',
                 'color': colors['text'],
