@@ -189,6 +189,7 @@ app.layout = html.Div(children=[
                          style_cell={'textAlign': 'left'},
                          style_table={'overflowX': 'scroll',
                                       'overflowY':'scroll',
+                                      'maxHeight':'330px',
                                       'backgroundColor': colors['background'],
                                       'color': colors['background']},
                          style_header={'backgroundColor': '#b3cde0',
