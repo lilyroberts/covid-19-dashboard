@@ -7,11 +7,11 @@ import logging
 import sqlite3
 import datetime
 import math
+import json
 import pandas as pd
 from update_db import update_db
 from pull_updated_data import pull_table
 from urllib.request import urlopen
-import json
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -76,7 +76,8 @@ cases_by_state_chloropleth.update_layout(geo_scope='usa',
                                                 'x':0.5,
                                                 'yanchor': 'top'})
 
-counties_df = pd.read_csv('https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv')
+counties_df = pd.read_csv('https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv',
+                          dtype={'fips','str'})
 nyc_fips = ['36005', '36047', '36085', '36081', '36061']
 COLS = ['date', 'county', 'state', 'fips', 'cases', 'deaths']
 
@@ -99,7 +100,7 @@ counties_df = pd.concat([non_nyc_counties_df, nyc_counties_df])
 counties_df.loc[counties_df.county == 'James city', 'county'] = 'James City'
 
 with urlopen('https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json') as response:
-    counties = json.load(response)x
+    counties = json.load(response)
 
 most_recent_date = pd.DataFrame(counties_df.groupby(['fips']).max()['date']).to_dict()['date']
 
