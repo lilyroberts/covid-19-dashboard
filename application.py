@@ -77,7 +77,7 @@ cases_by_state_chloropleth.update_layout(geo_scope='usa',
                                                 'yanchor': 'top'})
 
 counties_df = pd.read_csv('https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv',
-                          dtype={'fips','str'})
+                          dtype={'fips':'str'})
 nyc_fips = ['36005', '36047', '36085', '36081', '36061']
 COLS = ['date', 'county', 'state', 'fips', 'cases', 'deaths']
 
