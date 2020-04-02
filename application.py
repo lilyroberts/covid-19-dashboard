@@ -134,19 +134,8 @@ display_counties_df = current_counties_df[['date','county','state','cases','deat
                         .set_index('date') \
                         .sort_values('cases', ascending=False)
 
-counties_pop = pd.DataFrame(pd.read_excel('co-est2019-annres.xlsx',header=3)[3:3143][2019]).reset_index()
-counties_pop['index'] = counties_pop['index'].astype(str).str.replace('.','')
-counties_pop[['county','state']] = counties_pop['index'].str.split(', ',expand=True)
-counties_pop['county'] = counties_pop['county'].str.replace(' County','')
-counties_pop['county'] = counties_pop['county'].str.replace(' Parish','')
-counties_pop['county'] = counties_pop['county'].str.replace(' Municipality','')
-counties_pop = counties_pop[['county','state',2019]]
-counties_pop.county = counties_pop.county.str.replace('St ','St. ')
-counties_pop.county = counties_pop.county.str.replace('Ste ','Ste. ')
-counties_pop = pd.concat([counties_pop,pd.DataFrame(columns=['county','state',2019],
-                                     data=[['Autauga','Alabama',55869],
-                                           ['Baldwin','Alabama',223234],
-                                           ['New York City','New York',8336817]])],ignore_index=True)
+counties_pop = pd.read_csv('counties_pop.csv')
+
 merged = counties_df.merge(counties_pop,on=['county','state'])
 merged['rate'] = (merged['cases']*1.00) / (merged[2019]/1000)
 
