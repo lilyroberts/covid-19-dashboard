@@ -196,8 +196,6 @@ app.layout = html.Div(children=[
                                        'fontWeight': 'bold',
                                        'textAlign': 'center'}),
 
-    html.Br(),
-
     html.Caption('Data from New York Times - Updated at '
                  + str(datetime.datetime.strftime(datetime.datetime.now()
                                                   - datetime.timedelta(hours=4.0),
