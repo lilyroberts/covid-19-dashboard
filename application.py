@@ -97,6 +97,7 @@ for row in counties_df[counties_df['county'] == 'New York City'].itertuples():
     nyc_counties_df = pd.concat([nyc_counties_df, add_nyc_fips(row)]).reset_index(drop=True)
 
 counties_df = pd.concat([non_nyc_counties_df, nyc_counties_df])
+counties_df.loc[counties_df.county == 'James city', 'county'] = 'James City'
 
 with urlopen('https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json') as response:
     counties = json.load(response)
@@ -132,6 +133,69 @@ display_counties_df = current_counties_df[['date','county','state','cases','deat
                         .drop_duplicates() \
                         .set_index('date') \
                         .sort_values('cases', ascending=False)
+
+counties_pop = pd.DataFrame(pd.read_excel('co-est2019-annres.xlsx',header=3)[3:3143][2019]).reset_index()
+counties_pop['index'] = counties_pop['index'].str.replace('.','')
+counties_pop[['county','state']] = counties_pop['index'].str.split(', ',expand=True)
+counties_pop['county'] = counties_pop['county'].str.replace(' County','')
+counties_pop['county'] = counties_pop['county'].str.replace(' Parish','')
+counties_pop['county'] = counties_pop['county'].str.replace(' Municipality','')
+counties_pop = counties_pop[['county','state',2019]]
+counties_pop.county = counties_pop.county.str.replace('St ','St. ')
+counties_pop.county = counties_pop.county.str.replace('Ste ','Ste. ')
+counties_pop = pd.concat([counties_pop,pd.DataFrame(columns=['county','state',2019],
+                                     data=[['Autauga','Alabama',55869],
+                                           ['Baldwin','Alabama',223234],
+                                           ['New York City','New York',8336817]])],ignore_index=True)
+merged = counties_df.merge(counties_pop,on=['county','state'])
+merged['rate'] = (merged['cases']*1.00) / (merged[2019]/1000)
+
+most_recent_date = pd.DataFrame(counties_df.groupby(['fips']).max()['date']).to_dict()['date']
+
+current_merged_df = merged[merged.apply(lambda row: True if (row['date'] == most_recent_date.get(row['fips'])) else False,
+                              axis=1)]
+
+cases_by_county_chloropleth_rate = \
+    go.Figure(data=go.Choroplethmapbox(
+        geojson=counties,
+        z=current_merged_df.rate,
+        locations=current_merged_df.fips,
+        colorbar_title='Cases/1000 residents',
+        colorbar_title_side='right',
+        colorscale='Reds',
+        marker_opacity=0.5, marker_line_width=0))
+
+cases_by_county_chloropleth_rate.update_layout(mapbox_style="carto-positron",
+                                          mapbox_zoom=3, mapbox_center={"lat": 37.0902, "lon": -95.7129})
+
+cases_by_county_chloropleth_rate.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0},
+                                          autosize=True,
+                                          title_text="Confirmed Cases of SARS-CoV-2 per 1000 residents",
+                                          titlefont_color='#011f4b',
+                                          title_x=0.5,
+                                          title_y=0.95)
+cases_by_county_chloropleth_rate.update_yaxes(automargin=True)
+
+cases_by_county_chloropleth_rate_norm = \
+    go.Figure(data=go.Choroplethmapbox(
+        geojson=counties,
+        z=current_merged_df.rate.apply(lambda x: math.log(x)),
+        locations=current_merged_df.fips,
+        colorbar_title='log(N) Cases/1000 residents',
+        colorbar_title_side='right',
+        colorscale='Reds',
+        marker_opacity=0.5, marker_line_width=0))
+
+cases_by_county_chloropleth_rate_norm.update_layout(mapbox_style="carto-positron",
+                                          mapbox_zoom=3, mapbox_center={"lat": 37.0902, "lon": -95.7129})
+
+cases_by_county_chloropleth_rate_norm.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0},
+                                          autosize=True,
+                                          title_text="Normalized Confirmed Cases of SARS-CoV-2 per 1000 residents",
+                                          titlefont_color='#011f4b',
+                                          title_x=0.5,
+                                          title_y=0.95)
+cases_by_county_chloropleth_rate_norm.update_yaxes(automargin=True)
 
 app.layout = html.Div(children=[
     html.H1(children='SARS-CoV-2',
@@ -170,7 +234,7 @@ app.layout = html.Div(children=[
     #     figure=cases_by_report_date_table
     # ),
 
-    html.H4(children='Reported Cases by US County',
+    html.H4(children='Cases by US County per 1000 residents',
             style={
                 'textAlign': 'center',
                 'color': colors['text'],
@@ -178,8 +242,21 @@ app.layout = html.Div(children=[
             }
             ),
 
-    dcc.Graph(id='cases_by_county_chloropleth',
-              figure=cases_by_county_chloropleth),
+    dcc.Graph(id='cases_by_county_chloropleth_rate',
+              figure=cases_by_county_chloropleth_rate),
+
+    html.Br(),
+
+    html.H5(children='Cases by US County per 1000 residents - Normalized',
+            style={
+                'textAlign': 'center',
+                'color': colors['text'],
+                'font': 'Helvetica'
+            }
+            ),
+
+    dcc.Graph(id='cases_by_county_chloropleth_rate_norm',
+              figure=cases_by_county_chloropleth_rate_norm),
 
     html.Br(),
 
