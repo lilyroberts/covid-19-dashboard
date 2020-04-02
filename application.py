@@ -135,7 +135,7 @@ display_counties_df = current_counties_df[['date','county','state','cases','deat
                         .sort_values('cases', ascending=False)
 
 counties_pop = pd.DataFrame(pd.read_excel('co-est2019-annres.xlsx',header=3)[3:3143][2019]).reset_index()
-counties_pop['index'] = counties_pop['index'].str.replace('.','')
+counties_pop['index'] = counties_pop['index'].astype(str).str.replace('.','')
 counties_pop[['county','state']] = counties_pop['index'].str.split(', ',expand=True)
 counties_pop['county'] = counties_pop['county'].str.replace(' County','')
 counties_pop['county'] = counties_pop['county'].str.replace(' Parish','')
