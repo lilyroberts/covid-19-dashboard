@@ -207,6 +207,8 @@ app.layout = html.Div(children=[
                         'overflowY': 'hidden',
                         'color': colors['text']}),
 
+    html.Br(),
+
     html.H4(children='Reported Cases by US State/Territory',
             style={
                 'textAlign': 'center',
