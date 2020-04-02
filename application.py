@@ -137,7 +137,7 @@ display_counties_df = current_counties_df[['date','county','state','cases','deat
 counties_pop = pd.read_csv('counties_pop.csv')
 
 merged = counties_df.merge(counties_pop,on=['county','state'])
-merged['rate'] = (merged['cases']*1.00) / (merged[2019]/1000)
+merged['rate'] = (merged['cases']*1.00) / (merged['2019']/1000)
 
 most_recent_date = pd.DataFrame(counties_df.groupby(['fips']).max()['date']).to_dict()['date']
 
