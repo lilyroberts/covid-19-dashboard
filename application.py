@@ -145,7 +145,7 @@ app.layout = html.Div(children=[
 
     html.Div(children=html.P(['Tracking the 2019 novel coronavirus pandemic.',
                      html.Br(),
-                     'Created by Lily Slomski Roberts',
+                     'Created by Lily Roberts',
                      html.Br(),
                      'Project repository: ',
                      html.A('https://github.com/lilyroberts/SARS-CoV-2-Analysis',
