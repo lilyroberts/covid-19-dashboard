@@ -337,4 +337,8 @@ app.layout = html.Div(children=[
                backgroundColor=colors['background']))
 
 if __name__ == '__main__':
+<<<<<<< HEAD
+    application.run_server(debug=False, port=80)
+=======
     app.run_server(debug=False, port=80)
+>>>>>>> 4044a184f1ff749e1797cc2ac50b7f4213edf855
