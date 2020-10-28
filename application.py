@@ -196,8 +196,7 @@ app.layout = html.Div(children=[
                                        'textAlign': 'center'}),
 
     html.Caption('Data from New York Times - Updated at '
-                 + str(datetime.datetime.strftime(datetime.datetime.now()
-                                                  - datetime.timedelta(hours=4.0),
+                 + str(datetime.datetime.strftime(datetime.datetime.now(),
                                                   '%Y-%m-%d %I:%M:%S %p' + ' ET')),
                  style={'font': 'Helvetica',
                         'font-style':'italic',
@@ -239,8 +238,7 @@ app.layout = html.Div(children=[
                                        'textAlign':'center'}),
 
     html.Caption('Data from CDC.gov - Updated at '
-                 + str(datetime.datetime.strftime(datetime.datetime.now()
-                                                  - datetime.timedelta(hours=4.0),
+                 + str(datetime.datetime.strftime(datetime.datetime.now(),
                                                   '%Y-%m-%d %I:%M:%S %p' + ' ET')),
                  style={'font': 'Helvetica',
                         'font-style':'italic',
@@ -281,8 +279,7 @@ app.layout = html.Div(children=[
                          ),
 
     html.Caption('Data from CDC.gov - Updated at '
-                 + str(datetime.datetime.strftime(datetime.datetime.now()
-                                                  - datetime.timedelta(hours=4.0),
+                 + str(datetime.datetime.strftime(datetime.datetime.now(),
                                                   '%Y-%m-%d %I:%M:%S %p' + ' ET')),
                  style={'font': 'Helvetica',
                         'font-style': 'italic',
@@ -321,8 +318,7 @@ app.layout = html.Div(children=[
                                        'textAlign': 'center'}
                          ),
     html.Caption('Data from CDC.gov - Updated at '
-                 + str(datetime.datetime.strftime(datetime.datetime.now()
-                                                  - datetime.timedelta(hours=4.0),
+                 + str(datetime.datetime.strftime(datetime.datetime.now(),
                                                     '%Y-%m-%d %I:%M:%S %p' + ' ET')),
                  style={'font': 'Helvetica',
                         'font-style': 'italic',

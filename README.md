@@ -16,9 +16,9 @@ To deploy as an application using a service like AWS Elastic Beanstalk, edit the
 to say:
 ```application.run_server(debug=False, port=80)```.
 
-This will pass the server object to the AWS backend, instead of the app object used to render the Dash app locally.
+This will pass the server object to the AWS backend, instead of the app object used to render the Dash app on a local server.
 
 
 ### Here's what it looks like:
 
-![Example dashboard](https://github.com/lilyroberts/SARS-CoV-2-Analysis/blob/master/example-dash.png?raw=true)
+![Example dashboard](https://github.com/lilyroberts/SARS-CoV-2-Analysis/blob/master/covid-dash-example.png?raw=true)
