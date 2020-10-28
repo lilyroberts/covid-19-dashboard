@@ -1,6 +1,9 @@
-# 2019-nCoV-Analysis
+### Here's what it looks like:
 
-### How to run for the first time:
+![Example dashboard](https://github.com/lilyroberts/SARS-CoV-2-Analysis/blob/master/covid-dash-example.png?raw=true)
+
+
+### How to run it for the first time:
 
 Navigate into project root using your command line client of choice.
 Run the command:
@@ -17,8 +20,3 @@ to say:
 ```application.run_server(debug=False, port=80)```.
 
 This will pass the server object to the AWS backend, instead of the app object used to render the Dash app on a local server.
-
-
-### Here's what it looks like:
-
-![Example dashboard](https://github.com/lilyroberts/SARS-CoV-2-Analysis/blob/master/covid-dash-example.png?raw=true)
