@@ -5,7 +5,7 @@
 Navigate into project root using your command line client of choice.
 Run the command:
 ```pip install -r requirements.txt``` 
-to prepare environment.
+to prepare the environment.
 Then, run the command 
 ```python application.py```
 This will start the server at ```localhost:80```.  
