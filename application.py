@@ -155,7 +155,6 @@ app.layout = html.Div(children=[
                      html.A('Donate to the Food Bank for New York City',
                             href='https://secure3.convio.net/fbnyc/site/Donation2?df_id=9776&mfc_pref=T&9776.donation=form1&multiply=10&commas=yes',
                             target='_blank'),
-                     ' ; give to mutual aid orgs ; support each other. :)',
                      html.Br()]),
              style={'textAlign': 'center', 'color': colors['text'], 'backgroundColor': colors['background'],
                 'font':'Helvetica', 'display':'block'}),
