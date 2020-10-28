@@ -17,3 +17,8 @@ to say:
 ```application.run_server(debug=False, port=80)```.
 
 This will pass the server object to the AWS backend, instead of the app object used to render the Dash app locally.
+
+
+### Here's what it looks like:
+
+![Example dashboard](https://github.com/lilyroberts/SARS-CoV-2-Analysis/blob/master/example-dash.png?raw=true)
