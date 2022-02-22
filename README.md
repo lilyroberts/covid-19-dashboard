@@ -11,7 +11,7 @@ Run the command:
 to prepare the environment.
 Then, run the command 
 ```python application.py```
-This will start the server at ```localhost:80```.  
+This will start the server at ```localhost:8080```.  
 The server will automatically pull updated data from the NYT and CDC sources (although the CDC has stopped updating their feed), update the database, and render the dashboard.
 
 To deploy as an application using a service like AWS Elastic Beanstalk, edit the line in ```application.py```:

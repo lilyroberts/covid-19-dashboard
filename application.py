@@ -1,17 +1,30 @@
 import dash
-import dash_table
-import dash_core_components as dcc
-import dash_html_components as html
+from dash import dash_table
+from dash import dcc
+from dash import html
 import plotly.graph_objects as go
 import logging
 import sqlite3
 import datetime
 import math
 import pandas as pd
-from update_db import update_db
-from pull_updated_data import pull_table
+import numpy as np
 from urllib.request import urlopen
 import json
+
+from update_db import update_db
+from pull_updated_data import (
+    get_counties_geojson,
+    pull_table, 
+    get_counties_df,
+    make_current_counties_df,
+    get_counties_geojson
+)
+from make_figures import (
+    make_cases_by_state_chloropleth,
+    make_cases_by_county_chloropleth,
+    make_cases_by_date_bar
+)
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -19,18 +32,57 @@ logging.basicConfig(level=logging.INFO)
 logger.info('INITIALIZE DB CONNECTION')
 conn = sqlite3.connect('2019-nCoV-CDC.db')
 
+# constants
+STATE_COL_MAP = {
+    'state': {'name': 'Jurisdiction', 'id': 'state'},
+    'range': {'name': 'Range Confirmed Cases', 'id': 'range'},
+    'n_cases': {'name': 'N Confirmed Cases', 'id': 'n_cases'},
+    'community_spread': {'name': 'Community Spread', 'id': 'community_spread'}
+}
+
+STATE_COLS = ['state','n_cases','range','community_spread']
+
 # UPDATE DB
 logger.info('UPDATE DATABASE W CDC DATA')
 update_db(conn)
 
 # PULL UPDATED DATA
-state_cols = ['state','n_cases','range','community_spread']
-cases_by_state_df = pull_table(conn, 'cdc_cases_by_state')\
-    .sort_values('n_cases',ascending=False)\
-    .dropna().reset_index(drop=False)[state_cols]
+cases_by_state_df = (
+    pull_table(conn, 'cdc_cases_by_state')
+        .sort_values('n_cases',ascending=False)
+        .dropna().reset_index(drop=False)[STATE_COLS]
+)
 cases_by_report_date_df = pull_table(conn, 'cdc_cases_by_report_date').transpose()
 cases_by_onset_date_df = pull_table(conn, 'cdc_cases_by_onset_date').transpose()
 
+# show data tables
+# make bar chart Plotly figures
+logger.info('cases by report date figure')
+cases_by_report_date_bar = make_cases_by_date_bar(cases_by_report_date_df)
+
+logger.info('cases by onset date figure')
+cases_by_onset_date_bar = make_cases_by_date_bar(cases_by_onset_date_df)
+
+logger.info('make cases by state chloropleth')
+cases_by_state_chloropleth = make_cases_by_state_chloropleth(cases_by_state_df)
+
+logger.info('cases by county')
+counties_df = get_counties_df()
+current_counties_df = make_current_counties_df(counties_df)
+
+counties = get_counties_geojson()
+
+cases_by_county_chloropleth = make_cases_by_county_chloropleth(counties_df, current_counties_df, counties)
+
+display_counties_df = current_counties_df[['date','county','state','new_cases_per100k','deaths']] \
+                        .drop_duplicates() \
+                        .set_index('date') \
+                        .sort_values('new_cases_per100k', ascending=False)
+
+
+#######################
+### CREATE DASH APP ###
+#######################
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
@@ -41,100 +93,9 @@ colors = {
     'text': '#ffffff'
 }
 
-# show data tables
-# make bar chart Plotly figures
-
-cases_by_report_date_bar = go.Figure([go.Bar(x=cases_by_report_date_df.transpose().reset_index().date,
-                                             y=cases_by_report_date_df.transpose().n_cases)])
-
-cases_by_onset_date_bar = go.Figure([go.Bar(x=cases_by_onset_date_df.transpose().reset_index().date,
-                                            y=cases_by_onset_date_df.transpose().n_cases)])
-
-state_col_map = dict(state=dict(name='Jurisdiction', id='state'),
-                     range=dict(name='Range Confirmed Cases', id='range'),
-                     n_cases=dict(name='N Confirmed Cases', id='n_cases'),
-                     community_spread=dict(name='Community Spread', id='community_spread'))
-
-# create state name abbreviation mapping from file
-mapping_dict = pd.read_csv('state_abbrev_mapping.csv',index_col='state_name').to_dict(orient='index')
-cases_by_state_df['state_abbrev'] = [mapping_dict.get(i)['state_abbrev']
-                                     for i in cases_by_state_df.reset_index().dropna().state.values]
-
-# create chloropleth figure
-cases_by_state_chloropleth = go.Figure(data=go.Choropleth(
-                                            locations=cases_by_state_df['state_abbrev'],
-                                            z=cases_by_state_df['n_cases'],
-                                            locationmode='USA-states',
-                                            colorscale='Reds',
-                                            colorbar_title='N Confirmed Cases'
-                                            )
-                                      )
-
-cases_by_state_chloropleth.update_layout(geo_scope='usa',
-                                         title={'text':'Total Confirmed Cases of SARS-CoV-2 by U.S. State',
-                                                'xanchor': 'center',
-                                                'x':0.5,
-                                                'yanchor': 'top'})
-
-counties_df = pd.read_csv('https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv',
-                          dtype={'fips': 'str'})
-nyc_fips = ['36005', '36047', '36085', '36081', '36061']
-COLS = ['date', 'county', 'state', 'fips', 'cases', 'deaths']
-
-
-def add_nyc_fips(row):
-    temp_df = pd.DataFrame(columns=COLS)
-    for i in nyc_fips:
-        s = pd.Series([row.date, row.county, row.state, i, row.cases, row.deaths],
-                      index=COLS)
-        temp_df = pd.concat([temp_df, pd.DataFrame(s).transpose()]).reset_index(drop=True)
-    return temp_df
-
-
-nyc_counties_df = pd.DataFrame(columns=COLS)
-non_nyc_counties_df = counties_df[counties_df['county'] != 'New York City']
-for row in counties_df[counties_df['county'] == 'New York City'].itertuples():
-    nyc_counties_df = pd.concat([nyc_counties_df, add_nyc_fips(row)]).reset_index(drop=True)
-
-counties_df = pd.concat([non_nyc_counties_df, nyc_counties_df])
-
-with urlopen('https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json') as response:
-    counties = json.load(response)
-
-most_recent_date = pd.DataFrame(counties_df.groupby(['fips']).max()['date']).to_dict()['date']
-
-current_counties_df = counties_df[
-    counties_df.apply(lambda row: True if (row['date'] == most_recent_date.get(row['fips'])) else False,
-                      axis=1)]
-
-cases_by_county_chloropleth = \
-    go.Figure(data=go.Choroplethmapbox(
-        geojson=counties,
-        z=current_counties_df.cases.apply(lambda x: math.log(x)),
-        locations=current_counties_df.fips,
-        colorbar_title='log(N*1000) Cases',
-        colorbar_title_side='right',
-        colorscale='Reds',
-        marker_opacity=0.5, marker_line_width=0))
-
-cases_by_county_chloropleth.update_layout(mapbox_style="carto-positron",
-                                          mapbox_zoom=3, mapbox_center={"lat": 37.0902, "lon": -95.7129})
-
-cases_by_county_chloropleth.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0},
-                                          autosize=True,
-                                          title_text="log(N) Confirmed Cases of SARS-CoV-2 by U.S. County",
-                                          titlefont_color='#011f4b',
-                                          title_x=0.5,
-                                          title_y=0.95)
-cases_by_county_chloropleth.update_yaxes(automargin=True)
-
-display_counties_df = current_counties_df[['date','county','state','cases','deaths']] \
-                        .drop_duplicates() \
-                        .set_index('date') \
-                        .sort_values('cases', ascending=False)
-
+logger.info('create app layout')
 app.layout = html.Div(children=[
-    html.H1(children='SARS-CoV-2',
+    html.H1(children='COVID-19 Dashboard',
             style={
                 'textAlign': 'center',
                 'color': colors['text'],
@@ -168,43 +129,50 @@ app.layout = html.Div(children=[
     #     id='cases-by-report-date-table',
     #     figure=cases_by_report_date_table
     # ),
+    html.Div(children = [
+        html.H4(children='Reported Cases by US County',
+                style={
+                    'textAlign': 'center',
+                    'color': colors['text'],
+                    'font': 'Helvetica'
+                }
+                ),
 
-    html.H4(children='Reported Cases by US County',
-            style={
-                'textAlign': 'center',
-                'color': colors['text'],
-                'font': 'Helvetica'
-            }
-            ),
+        html.Div(children=[
+            dcc.Graph(id='cases_by_county_chloropleth',
+                    figure=cases_by_county_chloropleth)
+            ],
+            style={'width': '50%', 'display': 'inline-block'}
+        ),
 
-    dcc.Graph(id='cases_by_county_chloropleth',
-              figure=cases_by_county_chloropleth),
+        html.Div(children = [
+            dash_table.DataTable(id='cases-by-county-dash-table',
+                                columns=[{"name": i, "id": i} for i in display_counties_df.columns],
+                                data=display_counties_df.to_dict('records'),
+                                style_cell={'textAlign': 'left'},
+                                style_table={'overflowX': 'scroll',
+                                            'overflowY':'scroll',
+                                            'maxHeight':'500px',
+                                            'backgroundColor': colors['background'],
+                                            'color': colors['background']},
+                                style_header={'backgroundColor': '#b3cde0',
+                                            'fontWeight': 'bold',
+                                            'textAlign': 'center'})#,
 
-    html.Br(),
-
-    dash_table.DataTable(id='cases-by-county-dash-table',
-                         columns=[{"name": i, "id": i} for i in display_counties_df.columns],
-                         data=display_counties_df.to_dict('records'),
-                         style_cell={'textAlign': 'left'},
-                         style_table={'overflowX': 'scroll',
-                                      'overflowY':'scroll',
-                                      'maxHeight':'330px',
-                                      'backgroundColor': colors['background'],
-                                      'color': colors['background']},
-                         style_header={'backgroundColor': '#b3cde0',
-                                       'fontWeight': 'bold',
-                                       'textAlign': 'center'}),
-
-    html.Caption('Data from New York Times - Updated at '
-                 + str(datetime.datetime.strftime(datetime.datetime.now(),
-                                                  '%Y-%m-%d %I:%M:%S %p' + ' ET')),
-                 style={'font': 'Helvetica',
-                        'font-style':'italic',
-                        'font-weight':'light',
-                        'white-space': 'nowrap',
-                        'overflowY': 'hidden',
-                        'color': colors['text']}),
-
+            # html.Caption('Data from New York Times - Updated at '
+            #             + str(datetime.datetime.strftime(datetime.datetime.now(),
+            #                                             '%Y-%m-%d %I:%M:%S %p' + ' ET')),
+            #             style={'font': 'Helvetica',
+            #                     'font-style':'italic',
+            #                     'font-weight':'light',
+            #                     'white-space': 'nowrap',
+            #                     'overflowY': 'hidden',
+            #                     'color': colors['text']})#,
+            ],
+            style={'width': '50%', 'display': 'inline-block'}
+        )
+    ],
+    className = 'double-graph'),
     html.Br(),
 
     html.H4(children='Reported Cases by US State/Territory',
@@ -224,9 +192,9 @@ app.layout = html.Div(children=[
     html.Br(),
 
     dash_table.DataTable(id='cases-by-state-dash-table',
-                         columns=[{"name": state_col_map.get(i).get('name'),
-                                   "id": state_col_map.get(i).get('id')}
-                                  for i in state_cols],
+                         columns=[{"name": STATE_COL_MAP.get(i).get('name'),
+                                   "id": STATE_COL_MAP.get(i).get('id')}
+                                  for i in STATE_COLS],
                          data=cases_by_state_df.to_dict('records'),
                          style_table={'overflowX': 'scroll',
                                       'backgroundColor':colors['background'],
@@ -327,9 +295,9 @@ app.layout = html.Div(children=[
                         'overflow': 'hidden',
                         'color': colors['text']})
     ],
-    style=dict(padding='10%',
+    style=dict(padding='0%',
                margin='auto',
                backgroundColor=colors['background']))
 
 if __name__ == '__main__':
-    app.run_server(debug=False, port=80)
+    app.run_server(debug=False, port=8080)
